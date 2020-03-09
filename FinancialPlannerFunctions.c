@@ -4,13 +4,15 @@ void Employee_Detail(WINDOW *w,employee E,char *a)
 {
     int i=5,y=3,t=4,ch,sw,k,cmp;
     k=i;
+    employee F;
     char ID[20];
     char choice[4][40]={"YES","NO"};
     char month_p[12][5]={"Jan.","Feb.","Mar.","Apr.","May","June","July","Aug.","Sept.","Oct.","Nov.","Dec."};
-    FILE *p;
+    FILE *p,*q;
+    //init_pair(1,COLOR_CYAN,COLOR_BLACK);
     echo();
     wattron(w,A_ALTCHARSET);
-    mvwprintw(w,2,10,"%s","Please enter the details of employees :");
+    mvwprintw(w,2,10,"%s","HELLO");
     wattroff(w,A_ALTCHARSET);
     p=fopen(a,"ab");
     wgetch(w);
@@ -18,6 +20,15 @@ void Employee_Detail(WINDOW *w,employee E,char *a)
     mvwprintw(w,i++,y,"%s","ID:");
     wattroff(w,A_UNDERLINE);
     wgetstr(w,E.ID);
+    q=fopen(a,"rb");
+    while(fread(&F,sizeof(employee),1,q)==1)
+    {
+	if(strcmp(F.ID,E.ID)==0)
+	{
+	    E=F;
+	    goto existing;
+	}
+    }
     wattron(w,A_UNDERLINE);
     mvwprintw(w,i++,y,"%s","First Name:");
     wattroff(w,A_UNDERLINE);
@@ -369,7 +380,11 @@ DA:		wattron(w,A_UNDERLINE);
 	       i=k;
 	       wclear(w);
 	       wrefresh(w);
-	       wborder(w,'|','|','=','=','=','=','=','=');
+	       wattron(w,A_STANDOUT);
+	       wattron(w,COLOR_PAIR(1));
+	       wborder(w,' ',' ',' ',' ',' ',' ',' ',' ');
+	       wattroff(w,COLOR_PAIR(1));
+	       wattroff(w,A_STANDOUT);
 	       echo();
 	       keypad(w,TRUE);
 	       wattron(w,A_ALTCHARSET);
@@ -379,56 +394,28 @@ DA:		wattron(w,A_UNDERLINE);
 	       wattroff(w,A_ALTCHARSET);
 	       p=fopen(a,"ab");
 	       wattron(w,A_UNDERLINE);
-	       mvwprintw(w,i++,y+t,"%s","ID:");
+	       mvwprintw(w,i++,y,"%s","ID:");
 	       wattroff(w,A_UNDERLINE);
 	       mvwprintw(w,i-1,y+2*t,"%s",E.ID);
-	       wattron(w,A_UNDERLINE);
-	       mvwprintw(w,i++,y+t,"%s","First Name:");
+existing:      wattron(w,A_UNDERLINE);
+	       mvwprintw(w,i++,y,"%s","First Name:");
 	       wattroff(w,A_UNDERLINE);
 	       mvwprintw(w,i-1,y+3*t,"%s",E.name.init);
 	       wattron(w,A_UNDERLINE);
-	       mvwprintw(w,i++,y+t,"%s","Last Name:");
+	       mvwprintw(w,i++,y,"%s","Last Name:");
 	       wattroff(w,A_UNDERLINE);
 	       mvwprintw(w,i-1,y+3*t,"%s",E.name.surname);
-age1:    wattron(w,A_UNDERLINE);
-	 mvwprintw(w,i,y,"%s","Age:");
-	 wattroff(w,A_UNDERLINE);
-	 wscanw(w,"%d",&E.age);
-	 if(E.age<=14)
-	 {
-	     for(int space=2;space<=55;space++)
-		 mvwprintw(w,i,space,"%s","  ");
-	     wattron(w,COLOR_PAIR(4));
-	     mvwprintw(w,39,10,"%s","* Inappropriate Input.");
-	     wattroff(w,COLOR_PAIR(4));
-	     wrefresh(w);
-	     goto age1;
-	 }
-	 i++;
-
-	 for(int space=2;space<=55;space++)
-	     mvwprintw(w,39,space,"%s","  ");
-	 wrefresh(w);
-gender1:   wattron(w,A_UNDERLINE);
-	   mvwprintw(w,i,y,"%s","Gender(M/F/O):");
-	   wattroff(w,A_UNDERLINE);
-	   wscanw(w,"%s",&E.gender);
-	   if(strcmp(E.gender,"M") && strcmp(E.gender,"F") && strcmp(E.gender,"O"))
-	   {
-	       for(int space=2;space<=55;space++)
-		   mvwprintw(w,i,space,"%s","  ");
-	       wattron(w,COLOR_PAIR(4));
-	       mvwprintw(w,39,10,"%s","* Inappropriate Input.");
-	       wattroff(w,COLOR_PAIR(4));
-	       wrefresh(w);
-	       goto gender1;
-	   }
-	   i++;
-	   for(int space=2;space<=55;space++)
-	       mvwprintw(w,39,space,"%s","  ");
-	   wrefresh(w);
-
-	   goto here1;
+	       wattron(w,A_UNDERLINE);
+	       mvwprintw(w,i,y,"%s","Age:");
+	       wattroff(w,A_UNDERLINE);
+	       mvwprintw(w,i,y+t+1,"%d",E.age);
+	       i++;
+	       wattron(w,A_UNDERLINE);
+	       mvwprintw(w,i,y,"%s","Gender(M/F/O):");
+	       wattroff(w,A_UNDERLINE);
+	       mvwprintw(w,i,y+4*t-1,"%s",E.gender);
+	       i++;
+	       goto here1;
 	   }
 	   fclose(p);
 
@@ -1604,7 +1591,7 @@ void DisplayTransferDetail_DEBIT(WINDOW *w,Transaction *S_root,char ID[10],int y
 	}
 	while(traverse!=NULL)
 	{
-/*	    if(y==37)
+	    if(y==37)
 	    {
 		mvwprintw(w,69,x+5*t,"%s","Press Enter to Go to Next Page");
 		wscanw(w,"%d",ch);
@@ -1616,7 +1603,7 @@ void DisplayTransferDetail_DEBIT(WINDOW *w,Transaction *S_root,char ID[10],int y
 		}
 		y=10;
 		
-	    }*/
+	    }
 	    mvwprintw(w,y,x+4*t,"%s",traverse->ID);
 	    mvwprintw(w,y,x+9*t,"%s %s",traverse->name.init,traverse->name.surname);
 	    mvwprintw(w,y,x+16*t+2,"%s",traverse->dt);
