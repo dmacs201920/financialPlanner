@@ -5,6 +5,14 @@
 #include<ncurses.h>
 
 char *gets(char *s);
+typedef struct Password
+{
+    char password[15];
+    int  rand_value[15];
+    int   len;
+    int  user_status;
+    int  operation[15];
+}Password;
 typedef struct Debit
 {
     char receiver_id[20];
@@ -93,5 +101,16 @@ void TransferDetail(WINDOW *w,char *a);
 int DisplayAllTransfer_DEBIT(WINDOW *w,Transaction *S_root,int y);
 int DisplayAllTransfer_CREDIT(WINDOW *w,Transaction *R_root,int y);
 void TransferDetail_all(WINDOW *w,char *a);
-void main_fun(char *a,char *b);
+int DisplayTransferDetail_DEBIT(WINDOW*,Transaction*,char*,int);
+int DisplayTransferDetail_CREDIT(WINDOW*,Transaction*,char*,int);
+int main_fun(char *a,char *b);
 float EstimateIncome(char ID[],int year);
+void TransferDetails_clear(WINDOW *w,char *a);
+void TransferAllDetails_clear(WINDOW *w,char *a);
+Transaction* ClearDebt(Transaction *root,char *ID1,char *ID2,float amount);
+void Encryption(WINDOW * ,char*,char*);
+Password Decryption(char*);
+int epassword(WINDOW *w,char *c);
+void ChangePassword(WINDOW *w,char *c);
+void newuser(WINDOW *w,char *c);
+int main_win(char *c);

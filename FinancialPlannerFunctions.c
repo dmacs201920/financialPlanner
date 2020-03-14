@@ -369,7 +369,7 @@ DA:		wattron(w,A_UNDERLINE);
 	   mvwprintw(w,i++,y,"%s","TAX:");
 	   wattroff(w,A_UNDERLINE);
 	   mvwprintw(w,i++,y,"%f",E.tax);
-	   fwrite(&E,sizeof(E),1,p);
+	   fwrite(&E,sizeof(employee),1,p);
 	   wattron(w,A_UNDERLINE);
 	   mvwprintw(w,i++,y+t,"%s","Do you want to Continue : ");
 	   wattroff(w,A_UNDERLINE);
@@ -439,7 +439,7 @@ void TAX(WINDOW *w,char *a)
     p=fopen(a,"rb");
     // rewind(p);
     fseek(p,0,0);
-    while(fread(&E,sizeof(E),1,p)==1)
+    while(fread(&E,sizeof(employee),1,p)==1)
     {
 	cmp=strcmp(E.ID,ID);
 	if(cmp==0)
@@ -462,11 +462,13 @@ void TAX(WINDOW *w,char *a)
 
 float taxcal(employee E)
 {
-    float gross_sal,policy,tax=0;
-    policy=E.exp.PD.lifeins+E.exp.PD.medicalins+E.exp.PD.motorins+E.exp.PD.others;
-    gross_sal=EstimateIncome(E.ID,E.year);
-    gross_sal=gross_sal-policy;
-    int i=0,j=0,s=1,k=0;
+    float gross_sal,policy=0,tax=0;
+    employee F;
+    FILE *f;
+   // policy=E.exp.PD.lifeins+E.exp.PD.medicalins+E.exp.PD.motorins+E.exp.PD.others;
+   // gross_sal=EstimateIncome(E.ID,E.year);
+   // gross_sal=gross_sal-policy;
+    int i=0,j=0,s=1,k=0,flag=0;
     float slab[][8]={{2001,50000,0,60000,10,150000,20,30},
 	{2002,50000,0,60000,10,150000,20,30},
 	{2003,50000,0,60000,10,150000,20,30},
@@ -517,6 +519,31 @@ float taxcal(employee E)
 	{2020,250000,0,500000,5,1000000,20,30},
 	{2020,250000,0,500000,5,1000000,20,30},
 	{2020,300000,0,500000,5,1000000,20,30}};
+
+    f=fopen("EmployeesB.txt","r");
+    if(f==NULL)
+    {
+	printf("The File doesnot exist\n");
+	exit(-1);
+    }
+    fread(&F,sizeof(employee),1,f);
+    while(!feof(f))
+    {
+	if(strcmp(F.ID,E.ID)==0&&F.year==E.year)
+	{ 
+	    while(F.year==E.year)
+	    {	
+		policy=policy+F.exp.PD.lifeins+F.exp.PD.medicalins+F.exp.PD.motorins+F.exp.PD.others;
+		fread(&F,sizeof(employee),1,f);
+		flag=1;
+	    }
+	}
+	if(flag==1)
+	    break;
+	fread(&F,sizeof(employee),1,f);
+    }
+    gross_sal=EstimateIncome(E.ID,E.year);
+    gross_sal=gross_sal-policy;
 
     for(i=0;i<51;i++)
     {
@@ -864,7 +891,7 @@ void display_id(WINDOW *w,employee E,char *a)
     wattroff(w,A_UNDERLINE);
     wrefresh(w);
     rewind(p);
-    fread(&E,sizeof(E),1,p);
+    fread(&E,sizeof(employee),1,p);
     while(!feof(p))
     {
 	cmp=strcmp(E.ID,ID);
@@ -974,7 +1001,7 @@ income1:        s=2;
 			else
 			{
 			    rewind(p);
-			    fread(&E,sizeof(E),1,p);
+			    fread(&E,sizeof(employee),1,p);
 			    while(!feof(p))
 			    {
 				cmp1=strcmp(E.ID,ID);
@@ -990,7 +1017,7 @@ income1:        s=2;
 				    }
 
 				}
-				fread(&E,sizeof(E),1,p);
+				fread(&E,sizeof(employee),1,p);
 			    }
 			    getyx(w,s,x);
 			    mvwprintw(w,1,1,"%d",s);
@@ -1009,7 +1036,7 @@ income1:        s=2;
 	    else
 	    {
 		rewind(p);
-		fread(&E,sizeof(E),1,p);
+		fread(&E,sizeof(employee),1,p);
 		while(!feof(p))
 		{
 		    cmp1=strcmp(E.ID,ID);
@@ -1018,7 +1045,7 @@ income1:        s=2;
 			if(E.year==year)
 			    goto income;
 		    }
-		    fread(&E,sizeof(E),1,p);
+		    fread(&E,sizeof(employee),1,p);
 		}
 		wattron(w,COLOR_PAIR(4));
 		mvwprintw(w,y+8*s,x+10*t,"%s","Details of Particular year Not Found.");
@@ -1036,7 +1063,7 @@ income1:        s=2;
 	    wattroff(w,A_BOLD);
 	    rewind(p);
 	    l++;
-	    fread(&E,sizeof(E),1,p);
+	    fread(&E,sizeof(employee),1,p);
 	    while(!feof(p))
 	    {
 		cmp1=strcmp(E.ID,ID);
@@ -1054,7 +1081,7 @@ income1:        s=2;
 		    }
 		}
 
-		fread(&E,sizeof(E),1,p);
+		fread(&E,sizeof(employee),1,p);
 	    }
 	    wrefresh(w);
 	    wclear(w1);
@@ -1065,7 +1092,7 @@ income1:        s=2;
 
 	    break;
 	}
-	fread(&E,sizeof(E),1,p);
+	fread(&E,sizeof(employee),1,p);
 
     }
     if(cmp!=0)
@@ -1592,6 +1619,19 @@ int DisplayTransferDetail_DEBIT(WINDOW *w,Transaction *S_root,char ID[10],int y)
 	}
 	while(traverse!=NULL)
 	{
+	    if(y==37)
+	    {
+		mvwprintw(w,69,x+5*t,"%s","Press Enter to Go to Next Page");
+		wscanw(w,"%d",ch);
+		if(ch==10)
+		{
+		    for(int line=a;line<=69;line++)
+			for(int space=1;space<=129;space++)
+			    mvwprintw(w,line,space,"%s"," ");
+		}
+		y=10;
+		
+	    }
 	    mvwprintw(w,y,x+4*t,"%s",traverse->ID);
 	    mvwprintw(w,y,x+9*t,"%s %s",traverse->name.init,traverse->name.surname);
 	    mvwprintw(w,y,x+16*t+2,"%s",traverse->dt);
@@ -1795,7 +1835,6 @@ starting:   y=2;
 	    }
 	    sender_root=FillName(w,a,sender_root,0,ID,1,y);
 	    receiver_root=FillName(w,a,receiver_root,1,ID,1,y);
-	    //sw=sw-1;
 	    switch(sw)
 	    {
 		case 1:
@@ -1847,17 +1886,6 @@ void TransferDetail_all(WINDOW *w,char *a)
     FILE *f=fopen(a,"rb");
     char list[13][40]={"DEBIT","CREDIT","EXIT"};
     WINDOW *w1;
-starting:   y=2;
-	    w1=newwin(5,13,0,0);
-	    wattron(w1,COLOR_PAIR(2));
-	    wattron(w1,A_REVERSE);
-	    wborder(w1,' ',' ',' ',' ',' ',' ',' ',' ');
-	    wattroff(w1,A_REVERSE);
-	    wattroff(w1,COLOR_PAIR(2));
-	    sw=menu(w1,1,1,list,3,ch,2);
-	    if(sw==3)
-		goto Exit;
-	    fread(&E,sizeof(employee),1,f);
 	    wattron(w,A_BOLD);
 	    wattron(w,A_STANDOUT);
 	    mvwprintw(w,y,x+12*t,"%s","XXX TRANSACTION DETAILS XXX");
@@ -1886,6 +1914,17 @@ starting:   y=2;
 	    }
 	    sender_root=FillName(w,a,sender_root,0," ",2,y);
 	    receiver_root=FillName(w,a,receiver_root,1," ",2,y);
+starting:   y=2;
+	    w1=newwin(5,13,0,0);
+	    wattron(w1,COLOR_PAIR(2));
+	    wattron(w1,A_REVERSE);
+	    wborder(w1,' ',' ',' ',' ',' ',' ',' ',' ');
+	    wattroff(w1,A_REVERSE);
+	    wattroff(w1,COLOR_PAIR(2));
+	    sw=menu(w1,1,1,list,3,ch,2);
+	    if(sw==3)
+		goto Exit;
+	    fread(&E,sizeof(employee),1,f);
 	    switch(sw)
 	    {
 		case 1:
@@ -1931,6 +1970,448 @@ Exit:    wclear(w1);
 
 
 
+
+/////////////////////in the case/////////////////////////////////////
+void TransferDetails_clear(WINDOW *w,char *a)
+{
+ Transaction *sender_root=NULL,*receiver_root=NULL,*sender,*receiver;
+    employee E;
+ char list[13][40]={"DEBIT","CREDIT","EXIT"};
+    int x=2,y=2,t=4,i,ch,m,sw;
+FILE *f=fopen(a,"rb");
+   char ID[20];
+   WINDOW *w1;
+starting:    w1=newwin(8,8,0,122);
+    wattron(w1,COLOR_PAIR(2));
+    wattron(w1,A_REVERSE);
+    wborder(w1,' ',' ',' ',' ',' ',' ',' ',' ');
+    wattroff(w1,A_REVERSE);
+    wattroff(w1,COLOR_PAIR(2));
+    sw=menu(w1,1,1,list,3,ch,2);
+    echo();
+    wattron(w,A_BOLD);
+    wattron(w,A_STANDOUT);
+    mvwprintw(w,y++,15*t,"%s","ID:");
+    wattroff(w,A_BOLD);
+    wattroff(w,A_STANDOUT);
+    wgetstr(w,ID);
+noecho();
+fread(&E,sizeof(employee),1,f);
+while(!feof(f))
+{
+       for(i=0;E.exp.AC.debit[i].amount!=0;i++)      
+	  {
+           CreateNode(E,i,&sender,&receiver);
+	   sender_root=TransferDetailTree(sender_root,sender,receiver);
+          }
+	fread(&E,sizeof(employee),1,f);
+}
+fseek(f,0,0);
+fread(&E,sizeof(employee),1,f);
+while(!feof(f))
+{ 
+       for(i=0;E.exp.AC.debit[i].amount!=0;i++)
+        {     
+         CreateNode(E,i,&sender,&receiver);
+         receiver_root=TransferDetailTree(receiver_root,receiver,sender);
+        }
+	fread(&E,sizeof(employee),1,f);
+}
+sender_root=FillName(w,a,sender_root,0," ",2,y);
+receiver_root=FillName(w,a,receiver_root,1," ",2,y);
+fseek(f,0,0);
+fread(&E,sizeof(employee),1,f);
+while(!feof(f))
+  {
+   for(i=0;E.exp.AC.debit[i].amount!=0;i++)
+   {
+    sender_root=ClearDebt(sender_root,E.exp.AC.debit[i].receiver_id,E.ID,E.exp.AC.debit[i].amount);
+    receiver_root=ClearDebt(receiver_root,E.ID,E.exp.AC.debit[i].receiver_id,E.exp.AC.debit[i].amount);
+   }
+   fread(&E,sizeof(employee),1,f);
+  }
+    switch(sw)
+    {
+	case 1:
+	   m=DisplayTransferDetail_DEBIT(w,sender_root,ID,y);
+           if(m==-1)
+            {
+             wclear(w1);
+             wrefresh(w1);
+             delwin(w1);
+             for(int line=2;line<=39;line++)
+               for(int space=2;space<=127;space++)
+                 mvwprintw(w,line,space,"%s"," ");
+            goto starting;
+            }
+	    break;
+	case 2:
+	    DisplayTransferDetail_CREDIT(w,receiver_root,ID,y);
+            if(m==-1) 
+            {
+             wclear(w1);
+             wrefresh(w1);
+             delwin(w1);
+             for(int line=2;line<=39;line++)
+               for(int space=2;space<=127;space++)
+                 mvwprintw(w,line,space,"%s"," ");
+            goto starting;
+            }
+	    break;
+      case 3:
+           goto Exit;
+    }
+Exit:    wclear(w1);
+    wrefresh(w1);
+    delwin(w1);
+    free(sender_root);
+    free(receiver_root);
+    fclose(f);
+}
+
+///////////////////////////////in the case////////////////////////
+
+
+void TransferAllDetails_clear(WINDOW *w,char *a)
+{
+ Transaction *sender_root=NULL,*receiver_root=NULL,*sender,*receiver;
+    employee E;
+ char list[13][40]={"DEBIT","CREDIT","EXIT"};
+    int x=2,y=2,t=4,i,ch,m,sw;
+FILE *f=fopen(a,"rb");
+   WINDOW *w1;
+wattron(w,A_BOLD);
+    wattron(w,A_STANDOUT);
+    mvwprintw(w,y,x+12*t,"%s","XXX TRANSACTION DETAILS XXX");
+    wattroff(w,A_BOLD);
+    wattroff(w,A_STANDOUT);
+    y+=2;
+fread(&E,sizeof(employee),1,f);
+while(!feof(f))
+{
+       for(i=0;E.exp.AC.debit[i].amount!=0;i++)      
+	  {
+           CreateNode(E,i,&sender,&receiver);
+	   sender_root=TransferDetailTree(sender_root,sender,receiver);
+          }
+	fread(&E,sizeof(employee),1,f);
+}
+fseek(f,0,0);
+fread(&E,sizeof(employee),1,f);
+while(!feof(f))
+{ 
+       for(i=0;E.exp.AC.debit[i].amount!=0;i++)
+        {     
+         CreateNode(E,i,&sender,&receiver);
+         receiver_root=TransferDetailTree(receiver_root,receiver,sender);
+        }
+	fread(&E,sizeof(employee),1,f);
+}
+sender_root=FillName(w,a,sender_root,0," ",2,y);
+receiver_root=FillName(w,a,receiver_root,1," ",2,y);
+fseek(f,0,0);
+fread(&E,sizeof(employee),1,f);
+while(!feof(f))
+  {
+   for(i=0;E.exp.AC.debit[i].amount!=0;i++)
+   {
+    sender_root=ClearDebt(sender_root,E.exp.AC.debit[i].receiver_id,E.ID,E.exp.AC.debit[i].amount);
+    receiver_root=ClearDebt(receiver_root,E.ID,E.exp.AC.debit[i].receiver_id,E.exp.AC.debit[i].amount);
+   }
+   fread(&E,sizeof(employee),1,f);
+  }
+starting:    w1=newwin(8,8,0,0);
+    wattron(w1,COLOR_PAIR(2));
+    wattron(w1,A_REVERSE);
+    wborder(w1,' ',' ',' ',' ',' ',' ',' ',' ');
+    wattroff(w1,A_REVERSE);
+    wattroff(w1,COLOR_PAIR(2));
+    sw=menu(w1,1,1,list,3,ch,2);
+    switch(sw)
+    {
+	case 1:
+	   m=DisplayAllTransfer_DEBIT(w,sender_root,y);
+           if(m==-1)
+            {
+             wclear(w1);
+             wrefresh(w1);
+             delwin(w1);
+             for(int line=2;line<=39;line++)
+               for(int space=2;space<=127;space++)
+                 mvwprintw(w,line,space,"%s"," ");
+            goto starting;
+            }
+	    break;
+	case 2:
+	    DisplayAllTransfer_CREDIT(w,receiver_root,y);
+            if(m==-1) 
+            {
+             wclear(w1);
+             wrefresh(w1);
+             delwin(w1);
+             for(int line=2;line<=39;line++)
+               for(int space=2;space<=127;space++)
+                 mvwprintw(w,line,space,"%s"," ");
+            goto starting;
+            }
+	    break;
+      case 3:
+           goto Exit;
+    }
+Exit:    wclear(w1);
+    wrefresh(w1);
+    delwin(w1);
+    free(sender_root);
+    free(receiver_root);
+    fclose(f);
+}
+
+
+////////////////////////////////////Function Done//////////////////
+
+
+Transaction* ClearDebt(Transaction *root,char *ID1,char *ID2,float amount)
+   {
+    static int flag=1;
+    int i;
+    float reduced=0;
+    Transaction *traverse=root,*temp=NULL,*top_node=NULL;
+    while(traverse!=NULL)
+     {
+      if(strcmp(traverse->ID,ID1)==0)
+        {
+         top_node=traverse;
+         if((traverse->left!=NULL)&&(strcmp(traverse->left->ID,ID2)==0))
+           {
+            if(traverse->left->amount==amount)
+              {
+               reduced+=amount;
+               temp=traverse->left;
+               traverse->left=traverse->left->right;
+               if(traverse->left!=NULL)
+                  traverse->left->left=traverse;
+               free(temp);
+               amount=0;
+               goto END;
+              }
+            else
+            {
+                    if(traverse->left->amount<amount)
+                    {
+                        while((traverse->left!=NULL)&&(strcmp(traverse->left->ID,ID2)==0)&&(amount!=0))
+                           {
+                            if(traverse->left->amount<amount)
+                                {
+                              reduced+=traverse->left->amount;
+                            amount=amount-traverse->left->amount;
+                                }
+                            else
+                                {
+                                reduced+=amount;
+                                traverse->left->amount-=amount;
+                                amount=0;
+                                break;
+                                }
+                            temp=traverse->left;
+                            traverse->left=traverse->left->right;
+                            if(traverse->left!=NULL)
+                               traverse->left->left=traverse;
+                            free(temp);
+                           }
+                        if(amount==0)
+                        {
+                        goto END;
+                        }
+                        else
+                                {
+                                        traverse=traverse->left;
+                                        break;
+                                }
+                    }
+                    else
+                     if(traverse->left->amount>amount)
+                     {
+                      reduced+=amount;
+                      traverse->left->amount-=amount;
+                      amount=0;
+                      goto END;
+                     }
+
+            }
+           }
+         else
+           {
+            traverse=traverse->left;
+            break;
+           }
+        }
+      traverse=traverse->right;
+     }
+    if(amount!=0)
+      {
+       if(traverse!=NULL)
+       {
+       while(traverse->right!=NULL)
+         {
+          if(strcmp(traverse->right->ID,ID2)==0)
+            {
+
+             if(traverse->right->amount==amount)
+             {
+                  reduced+=amount;
+                  temp=traverse->right;
+                  traverse->right=traverse->right->right;
+                 if(traverse->right!=NULL)
+                    traverse->right->left=traverse;
+                  free(temp);
+                  amount=0;
+                  goto END;
+             }
+             else
+                {
+                 if(traverse->right->amount<amount)
+                 {
+                  reduced+=traverse->right->amount;
+                  amount=amount-traverse->right->amount;
+                  temp=traverse->right;
+                  traverse->right=traverse->right->right;
+                  if(traverse->right!=NULL)
+                    traverse->right->left=traverse;
+                  free(temp);
+                 }
+                 else
+                   if(traverse->right->amount>amount)
+                    {
+                     reduced+=amount;
+                     traverse->right->amount-=amount;
+                        amount=0;
+                     goto END;
+                    }
+                }
+            }
+         if(traverse->right!=NULL)
+           traverse=traverse->right;
+         else
+                {
+                if(amount==0)
+                   goto END;
+                else
+                        break;
+                }
+         }
+        }
+       }
+END:
+   if(top_node!=NULL)
+     top_node->amount-=reduced;
+   if(flag%2!=0&&reduced!=0)
+//     printf("\t%s\t%s\t\t%f\n",ID1,ID2,reduced);
+   flag++;
+    return root;
+   }
+
+
+/*
+
+Transaction* ClearDebt(Transaction *root,char *ID1,char *ID2,float amount)
+   {
+    int i;
+    float reduced=0;
+    Transaction *traverse=root,*temp=NULL,*top_node=NULL;
+    while(traverse!=NULL)
+     {
+      if(strcmp(traverse->ID,ID1)==0)
+        {
+         top_node=traverse;
+         if(strcmp(traverse->left->ID,ID2)==0)
+           {
+            if(traverse->left->amount==amount)
+	      {
+               reduced+=amount;
+               temp=traverse->left;
+               traverse->left=traverse->left->right;
+               if(traverse->left!=NULL)
+                 traverse->left->left=traverse;
+               free(temp);
+	       amount=0;
+	       break;
+	      }
+	    else
+	    {
+		    if(traverse->left->amount<amount)
+		    {
+                            reduced+=traverse->left->amount;
+			    amount=amount-traverse->left->amount;
+			    temp=traverse->left;
+			    traverse->left=traverse->left->right;
+                            if(traverse->left!=NULL)
+			      traverse->left->left=traverse;
+			    free(temp);
+		    }
+		    else
+		     if(traverse->left->amount>amount)
+                     {
+                      reduced+=amount;
+                      traverse->left->amount-=amount;
+                      goto END;
+		     }
+
+	    }
+           }
+         else
+           {
+            traverse=traverse->left;
+            break;
+           }
+        }
+      traverse=traverse->right;
+     }
+    if(amount!=0)
+      while(traverse!=NULL)
+         {
+          if(strcmp(traverse->ID,ID2)==0)
+	    {
+	     if(traverse->right->amount==amount)
+	     {
+                  reduced+=amount;
+		  temp=traverse->right;
+		  traverse->right=traverse->right->right;
+                  if(traverse->right!=NULL)
+		    traverse->right->left=traverse;
+		  free(temp);
+		  amount=0;
+		  break;
+	     }
+	     else
+		{
+		 if(traverse->right->amount<amount)
+		 {
+                  reduced+=traverse->right->amount;
+		  amount=amount-traverse->right->amount;
+		  temp=traverse->right;
+                  traverse->right=traverse->right->right;
+                  if(traverse->right!=NULL)
+		    traverse->right->left=traverse;
+		  free(temp);
+		 }
+		 else
+		   if(traverse->right->amount>amount)
+		    {
+                     reduced+=amount;
+                     traverse->right->amount-=amount;
+		     goto END;
+		    }
+		}
+	    }
+	  traverse=traverse->right;
+         }
+END:
+    if(top_node!=NULL)
+      top_node->amount-=reduced;
+    //printf("\n");   
+    return root;
+   }
+*/
 
 
 
@@ -2345,8 +2826,173 @@ again1:        mvwprintw(w,y+2,x+5*t,"%s","Press 'q' to go back");
 
 
 }
+//////////////////PASSWORD////////////////
+int epassword(WINDOW *w,char *c)
+{
+    Password P;
+    FILE *f=fopen(c,"rb");
+    int y=2,x=2,t=4;
+    char str[15],option;
+    fread(&P,sizeof(Password),1,f);
+passw: mvwprintw(w,y++,x,"%s","USERNAME : STUDENT");
+      mvwprintw(w,y++,x,"%s","PASSWORD :");
+      wgetstr(w,str);
+      P=Decryption(c);
+      if(strcmp(str,P.password)==0)
+	  return(1);
+      else
+      {
+	  wattron(w,COLOR_PAIR(4));
+	  mvwprintw(w,y+3,x+3,"%s","INVALID PASSWORD");
+	  wattroff(w,COLOR_PAIR(4));
+	  goto passw;
+      }
+}
+
+
+void ChangePassword(WINDOW *w,char *c)
+{
+    Password P;
+    char str1[15],str2[15];
+    int y=4,x=2,t=4;
+    FILE *f;
+    f=fopen(c,"rb");
+    fread(&P,sizeof(Password),1,f);
+    P=Decryption(c);
+Start:
+    mvwprintw(w,y++,x+t,"%s","Current Password : ");
+   wgetstr(w,str1);
+    strcpy(str2,"");
+    if(strcmp(P.password,str1)==0)
+    {
+	while(strcmp(str1,str2)!=0)
+	{
+Input:
+	    mvwprintw(w,y++,x+t,"%s","Enter New password : ");
+	    wgetstr(w,str1);
+	    if(strlen(str1)>15)
+	    {
+		wattron(w,COLOR_PAIR(4));
+		mvwprintw(w,6,3,"%s","Length Limit Exceeded");
+		wattroff(w,COLOR_PAIR(4));
+		goto Input;
+	    }
+	    for(int space=2;space<=40;space++)
+		mvwprintw(w,6,space,"%s"," ");
+	    mvwprintw(w,y++,x+t,"%s","Confirm New password : ");
+	    wgetstr(w,str2);
+	    if(strcmp(str1,str2)==0)
+	    {
+		Encryption(w,str1,c);
+		break;
+	    }
+	    else
+	    {
+		wattron(w,COLOR_PAIR(4));
+		mvwprintw(w,6,3,"%s","Password Does not Match");
+		wattroff(w,COLOR_PAIR(4));
+	    }
+	}
+	for(int space=2;space<=40;space++)
+	    mvwprintw(w,6,space,"%s"," ");
+    }
+    else
+    {
+	wattron(w,COLOR_PAIR(4));
+	mvwprintw(w,6,3,"%s","Invalid Password");
+	wattroff(w,COLOR_PAIR(4));
+    }
+    wattron(w,COLOR_PAIR(1));
+    mvwprintw(w,6,3,"%s","Your Password is changed...Thank you..");
+    wattroff(w,COLOR_PAIR(1));
+}
+
+
+
+void newuser(WINDOW *w,char *c)
+{
+    FILE *f;
+    int y=2,x=2,t=4;
+    Password P;
+    f=fopen(c,"rb");
+    fread(&P,sizeof(Password),1,f);
+    if(P.user_status!=0)
+	mvwprintw(w,y++,x+t,"%s","Sorry,u are not new user.");
+    else
+    {
+	mvwprintw(w,y++,x+t,"%s","It is better to change your current password to keep your data secure....");
+	mvwprintw(w,y++,x+t,"%s","Your current password is '0000'.");
+	ChangePassword(w,c);
+    }
+	fclose(f);
+}
+
+
+
+void Encryption(WINDOW *w,char str[15],char *c)
+{ 
+    Password P;
+    char copy[15];
+    int seed=10,i,x;
+    FILE *f;
+    P.len=strlen(str);
+    f=fopen(c,"wb");
+    if(f==NULL)
+    {
+	mvwprintw(w,6,3,"%s","File not Found");
+	exit(-1);
+    } 
+    strcpy(copy,str);
+    i=0;
+    void srand(seed);
+    while(str[i]!='\0')
+    {
+	x=1+rand()%20;
+	P.rand_value[i]=x;
+	P.operation[i]=x%2;
+	if(P.operation[i]==0)
+	{
+	    str[i]=(char)((int)str[i]+x);
+	    i++;
+	}
+	else
+	{
+	    str[i]=(char)((int)str[i]-x);
+	    i++;
+	}        
+    }
+    strcpy(P.password,str);
+    if(strcmp(copy,"0000")==0)
+	P.user_status=0;
+    else
+	P.user_status=1;
+    fwrite(&P,sizeof(Password),1,f);
+    fclose(f);
+}
+
+
+Password  Decryption(char *c)
+{
+    Password P;
+    FILE *f;
+    int i,operation,operand;
+    f=fopen(c,"rb");
+    fread(&P,sizeof(Password),1,f);
+    i=0;
+    while(i<P.len)
+    {
+	if(P.operation[i]==0)
+	    P.password[i]=(char)((int)P.password[i]-P.rand_value[i]);
+	else
+	    P.password[i]=(char)((int)P.password[i]+P.rand_value[i]);
+	i++;
+    } 
+    fclose(f);
+    return P;
+}	
+
 /////////////////////////////////////////////////////////////////////////////MAIN FUNCTION//////////////////////////////////////////////////////////////////////////////////
-void main_fun(char *a,char *b)
+int main_fun(char *a,char *b)
 {
     FileEmployeeDetail(b,a);
     WINDOW *w;
@@ -2358,15 +3004,15 @@ void main_fun(char *a,char *b)
     char list1[13][40]={"New Employee","Update an Existing One","Back"};
     char list2[13][40]={"Transactions","Policy Details","Back"};
     char list3[13][40]={"Expensies","Policy","Transaction","BACK"};
-    char list4[13][40]={"Individual","Group","BACK"};
+    char list4[13][40]={"Individual","Group","clear indi","clear group" ,"BACK"};
     char list5[13][40]={"Debit","Credit","BACK"};
-    initscr();
-    start_color();
+//    initscr();
+/*    start_color();
     init_pair(0,COLOR_WHITE,COLOR_BLACK);
     init_pair(1,COLOR_GREEN,COLOR_BLACK);
     init_pair(2,COLOR_CYAN,COLOR_BLACK);
     init_pair(3,COLOR_MAGENTA,COLOR_BLACK);
-    init_pair(4,COLOR_RED,COLOR_BLACK);
+    init_pair(4,COLOR_RED,COLOR_BLACK);*/
 starting:
     w=newwin(10,80,18,33);
     wattron(w,COLOR_PAIR(2));
@@ -2520,7 +3166,7 @@ prev43:		w=newwin(6,70,20,35);
 		wborder(w,' ',' ',' ',' ',' ',' ',' ',' ');
 		wattroff(w,A_REVERSE);
 		wattroff(w,COLOR_PAIR(2));
-		m=menu(w,y,x,list4,3,ch,2);
+		m=menu(w,y,x,list4,5,ch,2);
 		wclear(w);
 		wrefresh(w);
 		delwin(w);
@@ -2557,7 +3203,38 @@ prev43:		w=newwin(6,70,20,35);
 			wrefresh(w);
 			delwin(w);
 			goto prev43;
-		    case 3:
+                    case 3:
+                        w=newwin(40,130,0,12);
+                        wattron(w,COLOR_PAIR(2));
+                        wattron(w,A_REVERSE);
+                        wborder(w,' ',' ',' ',' ',' ',' ',' ',' ');
+                        wattroff(w,A_REVERSE);
+                        wattroff(w,COLOR_PAIR(2));
+                        wrefresh(w);
+                        TransferDetails_clear(w,a);
+                        wrefresh(w);
+                        wgetch(w);
+                        wclear(w);
+                        wrefresh(w);
+                        delwin(w);
+                        goto prev43;
+		   case 4:
+                        w=newwin(40,130,0,12);
+                        wattron(w,COLOR_PAIR(2));
+                        wattron(w,A_REVERSE);
+                        wborder(w,' ',' ',' ',' ',' ',' ',' ',' ');
+                        wattroff(w,A_REVERSE);
+                        wattroff(w,COLOR_PAIR(2));
+                        wrefresh(w);
+                        TransferAllDetails_clear(w,a);
+                        wrefresh(w);
+                        wgetch(w);
+                        wclear(w);
+                        wrefresh(w);
+                        delwin(w);
+                        goto prev43;
+
+		    case 5:
 			goto prev4;
 		}
 	    case 4:
@@ -2568,52 +3245,103 @@ prev43:		w=newwin(6,70,20,35);
     }
 EXIT:
     refresh();
-    endwin();
+    //endwin();
+    return(0);
 }
 
 
 
-/*
-   int password(char *pass)
-   {
-   char *str="Sai Ram";
-   if(strcmp(pass,str)==0)
-   return(1);
-   else
-   return(0);
-   }
 
 
-   char *change_password()
-   {
-   int x=2,t=4,y=2,confirm,l1,l2;
-   char pass[15],npass1[15],npass2[15];
-oldpass:rintw(w,y,x+t,"%s","Old Password :");
-wgetstr(w,pass);
-confirm=password(pass);
-y++;
-if(confirn==1)
+int main_win(char *c)
 {
-newpass:l1=y;
-mvwprintw(w,y++,x+t,"%s","New Password :");
-wgetstr(npass1);
-mvwprintw(w,y++,x+t,"%s","Confirm Password :");
-wgetstr(wpass2);
-l2=y;
-if(strcmp(npass1,npass2)!=0)
-{
-for(int line=l1;line<=l2;line++)
-for(int space=1;space<=30,space++)
-mvwprintw(w,linw,space,"%s"," ");
-goto new_pass;
-}
-else
-{
-//store the pass word
-}
-}
-else
-goto oldpass;
+    char list[13][40]={"LOG IN","NEW USER","EXIT"};
+    char list1[13][40]={"ENTER PASSWORD","CHANGE PASSWORD","BACK"};
+    int sw,ch,y=2,x=2,sw1,p; 
+    WINDOW *w,*w1;
+    FILE *f;
+    char pass[15];
+starting:    w=newwin(20,20,0,0);
+    wattron(w,COLOR_PAIR(2));
+    wattron(w,A_REVERSE);
+    wborder(w,' ',' ',' ',' ',' ',' ',' ',' ');
+    wattroff(w,A_REVERSE);
+    wattroff(w,COLOR_PAIR(2));
+    wrefresh(w);
+    sw=menu(w,y,x,list,3,ch,2);
+    wclear(w);
+    wrefresh(w);
+    delwin(w);
+    sw=sw-1;
+    switch(sw)
+    {
+	case 1:
+	    w=newwin(20,20,0,0);
+	    wattron(w,COLOR_PAIR(2));
+	    wattron(w,A_REVERSE);
+	    wborder(w,' ',' ',' ',' ',' ',' ',' ',' ');
+	    wattroff(w,A_REVERSE);
+	    wattroff(w,COLOR_PAIR(2));
+	    wrefresh(w);
+prev1:	    sw1=menu(w,y,x,list1,3,ch,2);
+	    sw1=sw1-1;
+	    switch(sw)
+	    {
+		case 1:
+		    w1=newwin(40,40,0,20);
+		    wattron(w1,COLOR_PAIR(2));
+		    wattron(w1,A_REVERSE);
+		    wborder(w1,' ',' ',' ',' ',' ',' ',' ',' ');
+		    wattroff(w1,A_REVERSE);
+		    wattroff(w1,COLOR_PAIR(2));
+	            p=epassword(w1,c);
+	            if(p==1)
+	             return(1);		
+		    wrefresh(w1);
+		    wclear(w1);
+		    wrefresh(w1);
+		    delwin(w1);
+		    goto prev1;
+		case 2:
+		    w1=newwin(40,40,20,20);
+		    wattron(w1,COLOR_PAIR(2));
+		    wattron(w1,A_REVERSE);
+		    wborder(w1,' ',' ',' ',' ',' ',' ',' ',' ');
+		    wattroff(w1,A_REVERSE);
+		    wattroff(w1,COLOR_PAIR(2));
+		    ChangePassword(w1,c);
+		    wgetch(w1);
+		    wrefresh(w1);
+		    wclear(w1);
+		    wrefresh(w1);
+		    delwin(w1);
+		    goto prev1;
+		case 3:
+		    wrefresh(w);
+		    wclear(w);
+		    delwin(w);
+		    goto starting;
+	    }
+	case 2:
+	    w=newwin(60,60,0,0);
+	    wattron(w,COLOR_PAIR(2));
+	    wattron(w,A_REVERSE);
+	    wborder(w,' ',' ',' ',' ',' ',' ',' ',' ');
+	    wattroff(w,A_REVERSE);
+	    wattroff(w,COLOR_PAIR(2));
+	    wrefresh(w);
+	    newuser(w,c);
+	    wgetch(w);
+	    wrefresh(w);
+	    wclear(w);
+	    wrefresh(w);
+	    delwin(w);
+	    goto starting;
+	case 3:
+	    goto EXIT;
+    }
+EXIT: refresh();
+     // endwin();
+      return(0);
 }
 
- */

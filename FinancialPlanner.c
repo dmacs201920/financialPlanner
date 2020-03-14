@@ -2,10 +2,25 @@
 
 void main(int argc,char *argv[])
 {
-    if(argc!=3)
+    int i=0;
+    if(argc!=4)
     {
 	printf("Inappropriate  Arguments.\n");
 	exit(-1);
     }
-     main_fun(argv[1],argv[2]);
+    initscr();
+    start_color();
+    init_pair(0,COLOR_WHITE,COLOR_BLACK);
+    init_pair(1,COLOR_GREEN,COLOR_BLACK);
+    init_pair(2,COLOR_CYAN,COLOR_BLACK);
+    init_pair(3,COLOR_MAGENTA,COLOR_BLACK);
+    init_pair(4,COLOR_RED,COLOR_BLACK);
+    i=main_win(argv[3]);
+    if(i==1)
+	i=main_fun(argv[1],argv[2]);
+    if(i==0)
+    {
+	refresh();
+	endwin();
+    }
 }
