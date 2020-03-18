@@ -1,5 +1,5 @@
 #include"header.h"
-
+//This function takes the details from the user and writes  it to binary file.(By Abhay)
 void EmployeeDetail(WINDOW *w,employee E,char *a)
 {
     int i=5,y=3,t=4,ch,sw,k,cmp;
@@ -406,7 +406,7 @@ existing:      wattron(w,A_UNDERLINE);
 
 }
 
-
+//[By Abhay ]
 void TAX(WINDOW *w,char *a)
 {
     char ID[20];
@@ -437,7 +437,7 @@ void TAX(WINDOW *w,char *a)
     }
     wrefresh(w);
 }
-
+//Calculates the tax of the given Employee (By Arun)
 float TaxCal(float gross_sal,char ID[],int year,char *a)
 {
     float sal,policy=0,tax=0;
@@ -612,7 +612,7 @@ float TaxCal(float gross_sal,char ID[],int year,char *a)
     }
     return tax;
 }
-
+//Calculate the Gross Salary.( By Arun)
 float GrossSal(char ID[],int year,char *a)
 {
     FILE *f;
@@ -646,6 +646,7 @@ float GrossSal(char ID[],int year,char *a)
     return gross_sal;
 }
 
+// Gives the estimate income of the employee. (By Arun)
 
 float EstimateIncome(char ID[],int year)
 {
@@ -674,8 +675,7 @@ float EstimateIncome(char ID[],int year)
     fclose(f);
     return eincome;
 }
-/////////////////////////////////////////////
-////////////////////////////////////////////
+//Creates a node of type Yearlist (By Arun)
 Yearlist* MakeNode(char ID[],int year)
 {
     Yearlist *temp;
@@ -693,6 +693,7 @@ Yearlist* MakeNode(char ID[],int year)
     }
     return temp;
 }
+//insert the year and ID of the employee to the linked list. (By Arun)
 Yearlist* Insert(Yearlist *head,char ID[],int year)
 {
     Yearlist *temp=MakeNode(ID,year);
@@ -704,6 +705,7 @@ Yearlist* Insert(Yearlist *head,char ID[],int year)
 	head=temp;
     }
 }
+//searches the given ID and year in the link list.(By Arun)
 int Search(Yearlist  *head,char ID[], int year)
 {
     Yearlist *traverse=head;
@@ -717,6 +719,7 @@ int Search(Yearlist  *head,char ID[], int year)
     }
     return 0;
 }
+//Gives the total tax Collected int the given year.(By Arun)
 void TotalTax(WINDOW *w,char *a)
 {
     float tax,total=0,sal;
@@ -785,9 +788,8 @@ void TotalTax(WINDOW *w,char *a)
 }
 
 
-//////////////////////////////////////////////
-//////////////////////////////////////////////
 
+//By Abhay Dhiman
 int Menu(WINDOW *w,int y,int x, char list[13][40],int n,int ch,int c)
 {
     wattron(w,COLOR_PAIR(c));
@@ -840,7 +842,7 @@ int Menu(WINDOW *w,int y,int x, char list[13][40],int n,int ch,int c)
 
     }
 }
-
+// ( By Abhay )
 int MenuMonth(WINDOW *w,int y,int x, char list[13][40],int n,int ch,int c,int a)
 {
     wattron(w,COLOR_PAIR(c));
@@ -902,7 +904,7 @@ int MenuMonth(WINDOW *w,int y,int x, char list[13][40],int n,int ch,int c,int a)
 
     }
 }
-
+//This function takes date as a string converts into Date, Month and Year as integer.(By Arun)
 int  DateChangeCheck(char *str)
 {
     int power=1,no,sum=0;
@@ -936,7 +938,8 @@ int  DateChangeCheck(char *str)
 	return(1);
     else
 	return(-1);
-} 
+}
+//This function checks whether the given year is leap year or not.(By Arun) 
 int CheckLeapYear(int year)
 {
     if(year%4==0)
@@ -956,7 +959,7 @@ int CheckLeapYear(int year)
 
 }
 
-
+//This function checks whether the given date exist or not.(By Arun)
 int ValidityDate(int date,int month,int year)
 {
     if(date<1||month>12||month<1||year<1)
@@ -984,7 +987,7 @@ int ValidityDate(int date,int month,int year)
     return 1;
 }
 
-
+// This function display the personal details of the given Employee and various expenses in different fields. (By Abhay)
 void DislayId(WINDOW *w,employee E,char *a)
 {
     FILE *p;
@@ -1220,7 +1223,7 @@ Exit:    wclear(w1);
 	 delwin(w1);
 EXIT1:   fclose(p);
 }
-
+//This function reads the details of user from text file and writes it into a binary file. (By Arun)
 void FileEmployeeDetail(char *T,char *B)
 {
     WINDOW *w=newwin(100,100,0,0);
@@ -1340,7 +1343,7 @@ end:
 
 ///////////////////ANALYSIS FUNCTION/////////////////////////////////
 
-
+//This function calculates total expenses of any user in the Bill Section.(By Pintu)
 void BillDetail(WINDOW *w,char *a )
 {
     int i,j,current_year,diff_year=0,max_month,min_month,ch;
@@ -1612,6 +1615,7 @@ END: if(efound==0)
 }
 
 
+//This function calculates total expenses of any user in the Policy Section.(By Pintu)
 
 void PolicyDetail(WINDOW *w,char *a)
 {
@@ -1729,6 +1733,7 @@ again1:         mvwprintw(w,38,x+5*t,"%s","Press Enter to Go to Next Page,or 'q'
 
 
 ////////////////////////////////////////////////////////TRANSFER DAETAILS//////////////////////////////////////////////////////////////////////////////////
+//Creates the node of transaction type and assigns the corresponding values.(By Pintu)
 
 void CreateNode(employee E,int i,Transaction **sender,Transaction **receiver)
 {
@@ -1747,6 +1752,8 @@ void CreateNode(employee E,int i,Transaction **sender,Transaction **receiver)
     (*receiver)->left=NULL;
     (*receiver)->right=NULL;
 }
+// Creates the tree of all transactions.(By Pintu)
+
 Transaction* TransferDetailTree(Transaction *root,Transaction *E1,Transaction *E2)
 {
     Transaction *traverse=root;
@@ -1798,7 +1805,7 @@ Transaction* TransferDetailTree(Transaction *root,Transaction *E1,Transaction *E
     }
     return root;
 }
-
+//Displays the Details of the nodes having detail of debit.(By Pintu)
 int DisplayTransferDetail_DEBIT(WINDOW *w,Transaction *S_root,char ID[10],int y)
 {
     Transaction *traverse=S_root;
@@ -1907,7 +1914,7 @@ again1:       wattron(w,COLOR_PAIR(4));
     }
 }
 
-
+//Displays the Details of the nodes having detail of credit.(By Pintu)
 int DisplayTransferDetail_CREDIT(WINDOW *w,Transaction *R_root,char ID[10],int y)
 {
     Transaction *traverse=R_root;
@@ -2019,6 +2026,7 @@ again1:	    mvwprintw(w,38,x+5*t,"%s","Press 'q' to Go BACK");
     }
 
 }
+//(By Abhay )
 void TransferDetail(WINDOW *w,char *a)
 {
     Transaction *sender_root=NULL,*receiver_root=NULL,*sender,*receiver;
@@ -2113,7 +2121,7 @@ Exit:    wclear(w1);
 }
 
 
-
+// (By Abhay Dhiman)
 void TransferDetail_all(WINDOW *w,char *a)
 {
     Transaction *sender_root=NULL,*receiver_root=NULL,*sender,*receiver;
@@ -2208,7 +2216,7 @@ Exit:    wclear(w1);
 
 
 
-
+// keeps the nodes with resultant debit and credit of given ID.(By Pintu)
 void TransferDetails_clear(WINDOW *w,char *a)
 {
     Transaction *sender_root=NULL,*receiver_root=NULL,*sender,*receiver;
@@ -2312,7 +2320,7 @@ Exit:    wclear(w1);
 	 fclose(f);
 }
 
-
+// keeps the nodes with resultant debit and credit.	(By Pintu)
 void TransferAllDetails_clear(WINDOW *w,char *a)
 {
     Transaction *sender_root=NULL,*receiver_root=NULL,*sender,*receiver;
@@ -2413,7 +2421,7 @@ Exit:    wclear(w1);
 
 
 
-
+//Finds the resultant transaction.(By Pintu)
 Transaction* ClearDebt(Transaction *root,char *ID1,char *ID2,float amount)
 {
     static int flag=1;
@@ -2553,7 +2561,7 @@ END:
     return root;
 }
 
-
+//writes name of the user in all nodes of the tree from the binary file.(By Pintu)
 Transaction* FillName(WINDOW *w,char *a,Transaction *root,int option,char *ID,int sw,int y)
 {
     int x=2,t=4,a1=y,b;
@@ -2778,7 +2786,7 @@ gender1:     	    wattron(w,A_BOLD);
 }
 
 
-
+//Display the details of all nodes of debited .( By Pintu)
 int DisplayAllTransfer_DEBIT(WINDOW *w,Transaction *S_root,int y)
 {
     int x=2,t=4,a,b,ch;
@@ -2863,7 +2871,7 @@ again1:        mvwprintw(w,y+2,x+5*t,"%s","Press 'q' to go back");
 
 
 }
-
+//Display the details of all nodes of credited .(By Pintu)
 int DisplayAllTransfer_CREDIT(WINDOW *w,Transaction *R_root,int y)
 {
     int x=2,t=4,a,b,ch;
@@ -2952,6 +2960,8 @@ again1:        mvwprintw(w,38,x+5*t,"%s","Press 'q' to go back");
 
 
 //////////////////PASSWORD////////////////
+// This function takes a string(Password typed by user) and returns the truth value of Password.(By Abhay)
+
 int EPassword(WINDOW *w,char *c)
 {
     Password P;
@@ -3000,7 +3010,7 @@ passw: y=2;
        }
 }
 
-
+// This function allows the user to change the Password.(By Pintu)
 void ChangePassword(WINDOW *w,char *c)
 {
     Password P;
@@ -3125,7 +3135,7 @@ Input:
     }
 }
 
-
+// By Abhay Dhiman
 void NewUser(WINDOW *w,char *c)
 {
     FILE *f;
@@ -3145,6 +3155,7 @@ void NewUser(WINDOW *w,char *c)
 }
 
 
+//This function takes a string, Encrypts it by adding and subtracting some random numbers and stores it into a binary file.(By Pintu)
 
 void Encryption(WINDOW *w,char str[15],char *c)
 { 
@@ -3187,7 +3198,7 @@ void Encryption(WINDOW *w,char str[15],char *c)
     fclose(f);
 }
 
-
+// This function Decrypts the Encrypted Password and returns a record of type Password.(By Pintu)
 Password  Decryption(char *c)
 {
     Password P;
@@ -3209,6 +3220,7 @@ Password  Decryption(char *c)
 }	
 
 /////////////////////////////////////////////////////////////////////////////MAIN FUNCTION//////////////////////////////////////////////////////////////////////////////////
+// ( By Abhay )
 int MainFun(char *a,char *b)
 {
     FileEmployeeDetail(b,a);
@@ -3445,7 +3457,7 @@ EXIT:
 
 
 
-
+//( By Abhay )
 int MainWin(char *c)
 {
     char list[13][40]={"LOG IN","SIGN UP","EXIT"};
