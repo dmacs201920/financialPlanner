@@ -1,11 +1,23 @@
+/*//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||///////////////////////////////////////////////////////////////////////////
+						       | Project :  Financial Planner                               |
+						       |        By                                                  |
+						       |            Arun Ranjan Sahu (173215)                       |
+						       |            Abhay Dhiman     (173213)                       |
+						       |            Pintu Roy        (173207)                       |
+						       | Class   :  B.Sc.{ (III)rd  Maths }                         |
+						       | Date    :  21/03/2020                                      |
+///////////////////////////////////////////////////////||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||///////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
+////////////////////////////////////////////////////////////////////HEADER FILES////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 #include<math.h>
 #include<ncurses.h>
-
-char *gets(char *s);
-typedef struct Password
+#include<limits.h>
+///////////////////////////////////////////////////////////////Structure Declarations///////////////////////////////////////////////////////////////////////////////////////////////////////////
+typedef struct Password    
 {
     char password[15];
     int  rand_value[15];
@@ -13,10 +25,15 @@ typedef struct Password
     int  user_status;
     int  operation[15];
 }Password;
+typedef struct Yearlist
+{
+    char ID[20];
+    int  year;
+    struct Yearlist *next;
+}Yearlist;
 typedef struct Debit
 {
     char receiver_id[20];
-    char receiver_acc[20];
     char dt[10];
     float amount;
 }Debit;
@@ -30,7 +47,6 @@ typedef struct billdetail
 typedef struct account
 {
     Debit debit[10];
-    float tax;
 }account;
 typedef struct policydetail
 {
@@ -59,13 +75,10 @@ typedef struct employee
     Name  name;
     char  gender[1];
     int   age;
-    char acc_no[20];
     float income;
     int year;
-    expense exp;                    //The income & expenses are taken yearly
-    float tax;
+    expense exp;              
 }employee;
-
 typedef struct Transaction
    {
     char  ID[10];
@@ -75,42 +88,44 @@ typedef struct Transaction
     struct Transaction *left;
     struct Transaction *right;
    }Transaction;
-////////////////////////////////////////FUNCTION PROTOTYPE/////////////////////////////////////////////
-void   Employee_Detail(WINDOW *,employee ,char *);
-void   Expense_Detail();//takes all expenses from the user and write to employee's ID.txt file
-void   Display_Summary();//Displaying all expenses in tabular column
-void   Expense_Graph();//Displaying the graph of expense over a period of time
-float taxcal(employee E);//Tax Calculator
-int menu(WINDOW *w,int y,int x,char list[13][40],int n,int c,int ch);
-void TAX(WINDOW *w,char *a);
-void display_id(WINDOW *w,employee E,char *a);
-void transation(WINDOW *w,employee E,char *a);
-int menu_month(WINDOW *w,int y,int x, char list[13][40],int n,int ch,int c,int a);
-int  datechange_cheak(char *str);
-int CheckLeapYear(int year);
-int ValidityDate(int date,int month,int year);
-void FileEmployeeDetail(char *T,char *B);
-void BillDetail(WINDOW *w,char *a );
-void PolicyDetail(WINDOW *w,char *a);
-void   CreateNode(employee,int,Transaction**,Transaction**);
+///////////////////////////////////////////////////////////////////////////FUNCTION PROTOTYPE///////////////////////////////////////////////////////////////////////////////////////////////////
+int 	     MainWin(char *c);
+void 	     Encryption(WINDOW * ,char*,char*);
+Password     Decryption(char*);
+int 	     EPassword(WINDOW *w,char *c);
+void 	     ChangePassword(WINDOW *w,char *c);
+void 	     NewUser(WINDOW *w,char *c);
+int 	     MainFun(char *a,char *b);
+int          Menu(WINDOW *w,int y,int x,char list[13][40],int n,int c,int ch);
+int          MenuMonth(WINDOW *w,int y,int x, char list[13][40],int n,int ch,int c,int a);
+void         FileEmployeeDetail(char *T,char *B);
+void         EmployeeDetail(WINDOW *,employee ,char *);
+void         DisplayId(WINDOW *w,employee E,char *a);
+int          DateChangeCheck(char *str);
+int          CheckLeapYear(int year);
+int          ValidityDate(int date,int month,int year);
+void         BillDetail(WINDOW *w,char *a );
+void         PolicyDetail(WINDOW *w,char *a);
+void         CreateNode(employee,int,Transaction**,Transaction**);
 Transaction* FillName(WINDOW *w,char *a,Transaction *root,int option,char *ID,int sw,int y);
 Transaction* TransferDetailTree(Transaction*,Transaction*,Transaction*);
-int DisplayTransferDetail_DEBIT(WINDOW*,Transaction*,char*,int);
-int DisplayTransferDetail_CREDIT(WINDOW*,Transaction*,char*,int);
-void TransferDetail(WINDOW *w,char *a);
-int DisplayAllTransfer_DEBIT(WINDOW *w,Transaction *S_root,int y);
-int DisplayAllTransfer_CREDIT(WINDOW *w,Transaction *R_root,int y);
-void TransferDetail_all(WINDOW *w,char *a);
-int DisplayTransferDetail_DEBIT(WINDOW*,Transaction*,char*,int);
-int DisplayTransferDetail_CREDIT(WINDOW*,Transaction*,char*,int);
-int main_fun(char *a,char *b);
-float EstimateIncome(char ID[],int year);
-void TransferDetails_clear(WINDOW *w,char *a);
-void TransferAllDetails_clear(WINDOW *w,char *a);
+int          DisplayTransferDetail_DEBIT(WINDOW*,Transaction*,char*,int);
+int          DisplayTransferDetail_CREDIT(WINDOW*,Transaction*,char*,int);
+void         TransferDetail(WINDOW *w,char *a);
+int          DisplayAllTransfer_DEBIT(WINDOW *w,Transaction *S_root,int y);
+int          DisplayAllTransfer_CREDIT(WINDOW *w,Transaction *R_root,int y);
+void         TransferDetail_all(WINDOW *w,char *a);
+int 	     DisplayTransferDetail_DEBIT(WINDOW*,Transaction*,char*,int);
+int 	     DisplayTransferDetail_CREDIT(WINDOW*,Transaction*,char*,int);
+float 	     EstimateIncome(char ID[],int year);
+void 	     TransferDetails_clear(WINDOW *w,char *a);
+void 	     TransferAllDetails_clear(WINDOW *w,char *a);
 Transaction* ClearDebt(Transaction *root,char *ID1,char *ID2,float amount);
-void Encryption(WINDOW * ,char*,char*);
-Password Decryption(char*);
-int epassword(WINDOW *w,char *c);
-void ChangePassword(WINDOW *w,char *c);
-void newuser(WINDOW *w,char *c);
-int main_win(char *c);
+Yearlist*    MakeNode(char*,int);
+float        TaxCal(float gross_sal,char ID[],int year,char *a);
+void         TAX(WINDOW *w,char *a);
+Yearlist*    Insert(Yearlist*,char*,int);
+int 	     Search(Yearlist*,char*,int);
+void 	     TotalTax(WINDOW*,char*);
+void 	     TrackIncome(employee);
+float 	     GrossSal(char*,int,char*);
