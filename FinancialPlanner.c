@@ -15,9 +15,10 @@ void main(int argc,char *argv[])
     init_pair(2,COLOR_CYAN,COLOR_BLACK);
     init_pair(3,COLOR_MAGENTA,COLOR_BLACK);
     init_pair(4,COLOR_RED,COLOR_BLACK);
-    i=main_win(argv[3]);
+    i=MainWin(argv[3]);
+    refresh();
     if(i==1)
-	i=main_fun(argv[1],argv[2]);
+	i=MainFun(argv[1],argv[2]);
     if(i==0)
     {
 	refresh();
