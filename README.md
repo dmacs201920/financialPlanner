@@ -19,12 +19,15 @@ DIRECTION TO RUN :
              User should give command as ./FinancialPlanner EmployeesB.txt Employees.txt PasswordNew.txt
 DESCRIPTION: 
 	     This Project has three components 
-	                      1. Tracking the income and expenditure.
-					a. Tracks the income and expenditure on a daily basis.
+	                      1. Tracking the income & expenditure.
+					- Collects the income & expenses (manual/files) on a regular basis.
+					- Tracks them continuosly.
+					- Keeps track of Bill detail, Accounts & Policy. 
 			      2. Analysis.
-					a. Analysis of Bill Details(House rent,Electric Bill, Groceries, others).
-					b. Transaction Analysis.
-					c. Policy Detail Analysis.
+					- Shows basic income and expense summary.
+					- Classification
+						a. Transaction Analysis.
+						b. Policy Detail Analysis.
 			      3. Tax calculation. 
 					a. Calculates the tax of given Employee.
 					b. Calculate  the total tax of given year.

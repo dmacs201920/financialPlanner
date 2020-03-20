@@ -27,13 +27,13 @@ typedef struct Password
 }Password;
 typedef struct Yearlist
 {
-    char ID[20];
+    char ID[7];
     int  year;
     struct Yearlist *next;
 }Yearlist;
 typedef struct Debit
 {
-    char receiver_id[20];
+    char receiver_id[7];
     char dt[10];
     float amount;
 }Debit;
@@ -71,7 +71,7 @@ typedef struct Name
 
 typedef struct employee
 {
-    char   ID[20];
+    char   ID[7];
     Name  name;
     char  gender[1];
     int   age;
@@ -81,7 +81,7 @@ typedef struct employee
 }employee;
 typedef struct Transaction
    {
-    char  ID[10];
+    char  ID[7];
     Name  name;
     char  dt[10];
     float amount;
@@ -117,7 +117,7 @@ int          DisplayAllTransfer_CREDIT(WINDOW *w,Transaction *R_root,int y);
 void         TransferDetail_all(WINDOW *w,char *a);
 int 	     DisplayTransferDetail_DEBIT(WINDOW*,Transaction*,char*,int);
 int 	     DisplayTransferDetail_CREDIT(WINDOW*,Transaction*,char*,int);
-float 	     EstimateIncome(char ID[],int year);
+float 	     EstimateIncome(char ID[],int year,char *a);
 void 	     TransferDetails_clear(WINDOW *w,char *a);
 void 	     TransferAllDetails_clear(WINDOW *w,char *a);
 Transaction* ClearDebt(Transaction *root,char *ID1,char *ID2,float amount);
